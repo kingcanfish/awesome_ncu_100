@@ -59,7 +59,7 @@ def get_detail():
 
 class DB:
     def __init__(self):
-        self.db = pymysql.connect('*', '*', '*', '*')
+        self.db = pymysql.connect()
 
     def update_count(self):
         count = get_count()
@@ -69,22 +69,17 @@ class DB:
         self.db.commit()
         logger.critical("insert count   " + count + "   done")
 
-
-
     def update_detail(self):
 
         details = get_detail()
-        print(details)
 
         get_sql = """ select name ,giving_select, amount from giving_detail order by datetime_ desc limit 24"""
         cur = self.db.cursor()
         r = cur.execute(get_sql)
         results = cur.fetchall()
-        print(results)
 
         inter = [i for i in details if (i[0], i[1], i[2]) not in results]
         update_sql = """insert into  giving_detail (name ,giving_select, amount,datetime_) values (%s, %s,%s,%s)"""
-        print(inter)
         self.db.cursor().executemany(update_sql, inter)
         self.db.commit()
         logger.critical("insert detail done")
@@ -93,9 +88,9 @@ class DB:
 if __name__ == '__main__':
     a = DB()
     scheduler.configure(jobstores=job_stores, executors=executors, timezone=timezone("Asia/Shanghai"))
-    scheduler.add_job(a.update_count, "cron", hour=13, minute=15, second=0)
-    scheduler.add_job(a.update_count, "cron", hour=13, minute=16, second=0)
-    scheduler.add_job(a.update_count, "cron", hour=13, minute=17, second=0)
-    scheduler.add_job(a.update_count, "cron", hour=13, minute=18, second=0)
+    scheduler.add_job(a.update_count, "cron", hour=0, minute=0, second=0)
+    scheduler.add_job(a.update_count, "cron", hour=6, minute=0, second=0)
+    scheduler.add_job(a.update_count, "cron", hour=12, minute=0, second=0)
+    scheduler.add_job(a.update_count, "cron", hour=18, minute=0, second=0)
     scheduler.add_job(a.update_detail, "interval", minutes=1)
     scheduler.start()
